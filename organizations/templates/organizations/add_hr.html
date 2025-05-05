@@ -1,0 +1,191 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add HR Staff</title>
+    {% tailwind_css %}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.6s ease-out forwards; }
+
+        .select2-container--default .select2-selection--single {
+            height: 48px; border: 1px solid #e2e8f0;
+            border-radius: 0.5rem; padding: 0.5rem 1rem;
+        }
+        .select2-selection__arrow { height: 46px !important; }
+        .select2-selection__rendered { line-height: 46px !important; padding-left: 0 !important; }
+        .select2-results__option--highlighted[aria-selected] { background-color: #6366f1; }
+        .select2-results__option[aria-selected=true] { background-color: #e0e7ff; color: #4f46e5; }
+
+        .checkbox-container input[type="checkbox"] {
+            opacity: 0; position: absolute;
+        }
+        .checkbox-container label {
+            position: relative; padding-left: 2rem; cursor: pointer;
+        }
+        .checkbox-container label:before {
+            content: ''; position: absolute; left: 0; top: 0;
+            width: 1.25rem; height: 1.25rem;
+            border: 2px solid #c7d2fe; border-radius: 0.25rem;
+            background: white; transition: all 0.2s ease;
+        }
+        .checkbox-container input[type="checkbox"]:checked + label:before {
+            background-color: #4f46e5; border-color: #4f46e5;
+        }
+        .checkbox-container label:after {
+            content: '\f00c'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+            position: absolute; left: 0.25rem; top: 0; color: white;
+            font-size: 0.75rem; opacity: 0; transition: all 0.2s ease;
+        }
+        .checkbox-container input[type="checkbox"]:checked + label:after {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans antialiased">
+    <div class="container mx-auto px-4 py-12 max-w-2xl">
+        <div class="bg-white rounded-xl shadow-xl overflow-hidden animate-fadeIn">
+            <div class="bg-indigo-500 p-6 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4">
+                    <i class="fas fa-user-tie text-white text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-white">Add HR Staff Member</h1>
+                <p class="text-indigo-100 mt-1">Assign roles and permissions to HR personnel</p>
+            </div>
+
+            <div class="p-6 space-y-6">
+                {% if form.non_field_errors %}
+                <div class="bg-red-50 border-l-4 border-red-500 p-4">
+                    <div class="flex">
+                        <i class="fas fa-exclamation-circle text-red-500 mr-2 mt-1"></i>
+                        <p class="text-sm text-red-700">{{ form.non_field_errors }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <form method="post" id="hr-form" class="space-y-6">
+                    {% csrf_token %}
+
+                    <!-- User Selection -->
+                    <div>
+                        <label for="user-search" class="block text-sm font-medium text-gray-700">
+                            <i class="fas fa-user mr-2 text-indigo-500"></i> Select User
+                        </label>
+                        <select id="user-search" class="js-user-search w-full">
+                            {% if form.user.value %}
+                                <option value="{{ form.user.value }}" selected>{{ form.username_display.value }}</option>
+                            {% endif %}
+                        </select>
+                        {{ form.user }}
+                        {{ form.username_display }}
+                        {% if form.user.errors %}
+                        <div class="text-sm text-red-600 mt-1 flex items-start">
+                            <i class="fas fa-exclamation-circle mr-2"></i>{{ form.user.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- HR Role -->
+                    <div>
+                        <label for="id_role" class="block text-sm font-medium text-gray-700">
+                            <i class="fas fa-user-shield mr-2 text-indigo-500"></i> HR Role
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-tag text-gray-400"></i>
+                            </div>
+                            {{ form.role }}
+                        </div>
+                        {% if form.role.errors %}
+                        <div class="text-sm text-red-600 mt-1 flex items-start">
+                            <i class="fas fa-exclamation-circle mr-2"></i>{{ form.role.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Permissions -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">
+                            <i class="fas fa-key mr-2 text-indigo-500"></i> Permissions
+                        </label>
+                        <div class="space-y-3 pl-2">
+                            <div class="checkbox-container flex items-center">
+                                {{ form.can_post_jobs }}
+                                <label for="{{ form.can_post_jobs.id_for_label }}" class="text-gray-700">
+                                    Can Post Jobs <span class="text-gray-500 text-sm">(Create and manage job postings)</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-container flex items-center">
+                                {{ form.can_manage_applications }}
+                                <label for="{{ form.can_manage_applications.id_for_label }}" class="text-gray-700">
+                                    Can Manage Applications <span class="text-gray-500 text-sm">(Review and process applications)</span>
+                                </label>
+                            </div>
+                            <div class="checkbox-container flex items-center">
+                                {{ form.can_schedule_interviews }}
+                                <label for="{{ form.can_schedule_interviews.id_for_label }}" class="text-gray-700">
+                                    Can Schedule Interviews <span class="text-gray-500 text-sm">(Arrange and conduct interviews)</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <a href="{% url 'manage_hr_staff' %}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-times mr-2"></i> Cancel
+                        </a>
+                        <button type="submit" class="px-4 py-2 bg-indigo-500 text-white rounded-lg shadow-sm hover:bg-indigo-700 text-sm font-medium transform hover:scale-105 transition">
+                            <i class="fas fa-user-plus mr-2"></i> Add HR Staff
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+    $(document).ready(function () {
+        $('#user-search').select2({
+            placeholder: "Search for a user...",
+            ajax: {
+                url: "{% url 'user_search' %}",
+                dataType: 'json',
+                delay: 250,
+                data: params => ({ term: params.term }),
+                processResults: data => ({ results: data.results }),
+                cache: true
+            },
+            minimumInputLength: 1,
+            templateResult: user => !user.id ? user.text : $('<div class="flex items-center"><div class="h-8 w-8 bg-indigo-100 rounded-full flex justify-center items-center mr-3"><i class="fas fa-user text-indigo-600"></i></div><div class="text-gray-900 font-medium">' + user.text + '</div></div>'),
+            templateSelection: user => !user.id ? user.text : $('<div class="flex items-center"><div class="h-6 w-6 bg-indigo-100 rounded-full flex justify-center items-center mr-2"><i class="fas fa-user text-indigo-600 text-sm"></i></div><div>' + user.text + '</div></div>')
+        });
+
+        $('#user-search').on('change', function () {
+            var data = $(this).select2('data');
+            if (data[0]) {
+                $('#id_user').val(data[0].id);
+                $('#id_username_display').val(data[0].text);
+            }
+        });
+
+        $('#id_role').addClass('block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500');
+
+        {% if form.user.value %}
+        $('#id_username_display').val('{{ form.username_display.value }}');
+        {% endif %}
+    });
+    </script>
+</body>
+</html>

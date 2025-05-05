@@ -1,0 +1,147 @@
+<div class="application-card bg-white rounded-lg shadow-sm p-4 border-l-4
+    {% if application.status == 'pending' %}border-blue-500
+    {% elif application.status == 'interview_scheduled' %}border-purple-500
+    {% elif application.status == 'accepted' %}border-green-500
+    {% elif application.status == 'rejected' %}border-red-500
+    {% else %}border-yellow-500{% endif %}">
+    <div class="flex items-start space-x-3">
+        <div class="flex-shrink-0">
+            {% if application.applicant.profile.profile_image %}
+                <img class="h-10 w-10 rounded-full object-cover" 
+                     src="{{ application.applicant.profile.profile_image.url }}" 
+                     alt="{{ application.applicant.username }}">
+            {% else %}
+                <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                    <i class="fas fa-user text-gray-500"></i>
+                </div>
+            {% endif %}
+        </div>
+        <div class="flex-1 min-w-0">
+            <h3 class="font-medium text-gray-900">
+                {{ application.applicant.get_full_name|default:application.applicant.username }}
+            </h3>
+            <p class="text-sm text-gray-600">{{ application.applicant.email }}</p>
+            
+            {% if application.cv %}
+            <div class="mt-2">
+                <a href="{{ application.cv.url }}" target="_blank" 
+                   class="text-sm text-blue-600 hover:underline">
+                    <i class="fas fa-file-pdf mr-1"></i> View CV
+                </a>
+            </div>
+            {% endif %}
+            
+            {% if can_manage %}
+            <div class="mt-3 pt-2 border-t border-gray-100">
+                <form method="post" class="flex items-center space-x-2">
+                    {% csrf_token %}
+                    <input type="hidden" name="application_id" value="{{ application.id }}">
+                    <select name="status" 
+                            class="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="pending" {% if application.status == "pending" %}selected{% endif %}>Pending</option>
+                        <option value="interview_scheduled" {% if application.status == "interview_scheduled" %}selected{% endif %}>Interview</option>
+                        <option value="accepted" {% if application.status == "accepted" %}selected{% endif %}>Accepted</option>
+                        <option value="rejected" {% if application.status == "rejected" %}selected{% endif %}>Rejected</option>
+                        <option value="offer_made" {% if application.status == "offer_made" %}selected{% endif %}>Offer Made</option>
+                    </select>
+                    <button type="submit" name="update_status" 
+                            class="text-sm bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded">
+                        <i class="fas fa-check"></i>
+                    </button>
+                </form>
+                
+                {% if application.status != 'pending' and application.status != 'rejected' and can_manage %}
+<div class="mt-2">
+    <a href="{% url 'create_interview' org_id=organization.id job_id=job_posting.id application_id=application.id %}" 
+       class="text-xs text-purple-600 hover:underline">
+        <i class="fas fa-calendar-plus mr-1"></i> Schedule Interview
+    </a>
+</div>
+{% endif %}
+            </div>
+            {% endif %}
+            
+            {% for interview in application.interviews.all %}
+            <div class="mt-3 pt-2 border-t border-gray-100">
+                <div class="text-xs bg-gray-50 rounded p-2">
+                    <p class="font-medium">
+                        <i class="fas fa-video mr-1"></i> Interview Scheduled
+                    </p>
+                    <p>{{ interview.scheduled_time|date:"M d, Y H:i" }}</p>
+                    <a href="{{ interview.interview_link }}" target="_blank" 
+                       class="text-blue-600 hover:underline block truncate">
+                        {{ interview.interview_link }}
+                    </a>
+                    {% if can_manage %}
+                    <div class="mt-1 flex space-x-2">
+                        <a href="{% url 'update_interview' org_id=organization.id job_id=job_posting.id application_id=application.id interview_id=interview.id %}" 
+                           class="text-xs text-gray-600 hover:text-gray-900">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        
+                        <form method="post" action="{% url 'update_interview' org_id=organization.id job_id=job_posting.id application_id=application.id interview_id=interview.id %}" onsubmit="return confirm('Delete this interview?')">
+                            {% csrf_token %}
+                            <input type="hidden" name="delete_interview" value="1">
+                            <button type="submit" class="text-xs text-gray-600 hover:text-gray-900">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </form>
+                        
+
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle status change forms
+        document.querySelectorAll('form[name="update_status"]').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const applicationId = formData.get('application_id');
+                const status = formData.get('status');
+                
+                fetch(this.action || window.location.href, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Update the UI without refresh
+                        const statusBadge = document.querySelector(`#status-badge-${applicationId}`);
+                        if (statusBadge) {
+                            statusBadge.textContent = status;
+                            // Update border color based on status
+                            const card = document.querySelector(`#application-card-${applicationId}`);
+                            card.className = card.className.replace(/(border-\w+-500)/g, '');
+                            card.classList.add(`border-${this.getStatusColor(status)}-500`);
+                        }
+                    } else {
+                        alert('Error updating status');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+        
+        function getStatusColor(status) {
+            switch(status) {
+                case 'pending': return 'blue';
+                case 'interview_scheduled': return 'purple';
+                case 'accepted': return 'green';
+                case 'rejected': return 'red';
+                default: return 'yellow';
+            }
+        }
+    });
+    </script>

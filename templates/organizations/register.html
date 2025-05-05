@@ -1,0 +1,181 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organization Registration</title>
+    {% tailwind_css %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animated-bg {
+            background: linear-gradient(-45deg, #6e45e2, #89d4cf, #6e45e2, #89d4cf);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        .card-enter {
+            animation: fadeInUp 0.8s ease-out;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .animate-float {
+            animation: float 8s ease-in-out infinite;
+        }
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
+    </style>
+</head>
+<body class="font-['Inter'] bg-gray-50">
+    <!-- Animated Background -->
+    <div class="fixed inset-0 animated-bg opacity-20 z-0"></div>
+    
+    <!-- Floating Circles -->
+    <div class="fixed inset-0 overflow-hidden z-0">
+        <div class="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-purple-200 opacity-20 mix-blend-multiply filter blur-xl animate-float"></div>
+        <div class="absolute top-1/3 right-1/4 w-80 h-80 rounded-full bg-blue-200 opacity-20 mix-blend-multiply filter blur-xl animate-float animation-delay-2000"></div>
+        <div class="absolute bottom-1/4 right-1/3 w-72 h-72 rounded-full bg-teal-200 opacity-20 mix-blend-multiply filter blur-xl animate-float animation-delay-4000"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="relative z-10 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8 bg-white p-10 rounded-2xl shadow-2xl card-enter">
+            
+            <!-- Logo -->
+            <div class="flex justify-center">
+                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center shadow-lg">
+                    <i class="fas fa-building text-white text-3xl"></i>
+                </div>
+            </div>
+
+            <!-- Title -->
+            <div class="text-center">
+                <h2 class="mt-6 text-3xl font-extrabold text-gray-900">Organization Registration</h2>
+                <p class="mt-2 text-sm text-gray-600">Create your organization account</p>
+            </div>
+
+            <!-- Form -->
+            <form method="POST" class="mt-8 space-y-6">
+                {% csrf_token %}
+                <div class="space-y-5">
+                    
+                    <!-- Organization Name -->
+                    <div>
+                        <label for="id_organization_name" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-building mr-2 text-purple-500"></i> Organization Name
+                        </label>
+                        <input id="id_organization_name" name="organization_name" type="text" required
+                               class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200"
+                               placeholder="Your organization name">
+                               {% if form.organization_name.errors %}
+                               <p style="color:red;">{{ form.organization_name.errors.0 }}</p>
+                           {% endif %}
+                    </div>
+
+                    <!-- Registration Number -->
+                    <div>
+                        <label for="id_registration_number" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-id-card mr-2 text-purple-500"></i> Registration Number
+                        </label>
+                        <input id="id_registration_number" name="registration_number" type="text" required
+                               class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200"
+                               placeholder="Google business registration number">
+                               {% if form.registration_number.errors %}
+                               <p style="color:red;">{{ form.registration_number.errors.0 }}</p>
+                           {% endif %}
+                    </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label for="id_email" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-envelope mr-2 text-purple-500"></i> Email
+                        </label>
+                        <input id="id_email" name="email" type="email" required
+                               class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200"
+                               placeholder="your@organization.com">
+                               {% if form.email.errors %}
+                               <p style="color:red;">{{ form.email.errors.0 }}</p>
+                           {% endif %}
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label for="id_password1" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-lock mr-2 text-purple-500"></i> Password
+                        </label>
+                        <input id="id_password1" name="password1" type="password" required
+                               class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200"
+                               placeholder="••••••••">
+                               {% if form.password1.errors %}
+                               <p style="color:red;">{{ form.password1.errors.0 }}</p>
+                           {% endif %}
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div>
+                        <label for="id_password2" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-lock mr-2 text-purple-500"></i> Confirm Password
+                        </label>
+                        <input id="id_password2" name="password2" type="password" required
+                               class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition duration-200"
+                               placeholder="••••••••">
+                               {% if form.password2.errors %}
+                               <p style="color:red;">{{ form.password2.errors.0 }}</p>
+                           {% endif %}
+                    </div>
+                </div>
+
+                {% if form.non_field_errors %}
+                <p style="color:red;">{{ form.non_field_errors.0 }}</p>
+            {% endif %}
+
+                <!-- Terms and Conditions -->
+                <div class="flex items-center">
+                    <input id="terms" name="terms" type="checkbox" class="h-4 w-4 text-purple-600 border-gray-300 rounded">
+                    <label for="terms" class="ml-2 block text-sm text-gray-700">
+                        I agree to the <a href="#" class="text-purple-600 hover:text-purple-500">Terms and Conditions</a>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <div>
+                    <button type="submit"
+                            class="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-300 transform hover:scale-105">
+                        <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                            <i class="fas fa-user-plus text-white"></i>
+                        </span>
+                        Register Organization
+                    </button>
+                </div>
+            </form>
+
+            <!-- Navigation Links -->
+            <div class="flex justify-between space-x-4 mt-6">
+                <a href="{% url 'index_dashboard' %}"
+                   class="group w-full inline-flex justify-center items-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-150">
+                    <i class="fas fa-home mr-2 text-gray-500 group-hover:text-purple-500"></i>
+                    Back to Home
+                </a>
+                <a href="{% url 'organization_login' %}"
+                   class="group w-full inline-flex justify-center items-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-150">
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    Already Registered?
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

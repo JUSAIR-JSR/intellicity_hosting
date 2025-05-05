@@ -1,0 +1,276 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage HR Staff</title>
+    {% tailwind_css %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        .status-active {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+        
+        .status-inactive {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        
+        .role-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+        
+        .role-recruiter {
+            background-color: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+        }
+        
+        .role-manager {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+        
+        .role-admin {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+        
+        .hover-scale {
+            transition: transform 0.2s ease;
+        }
+        
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+        
+        .table-row-hover:hover {
+            background-color: #f8fafc;
+        }
+        
+        /* Toast notification styles */
+        .toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 100;
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .toast-success {
+            background-color: #10b981;
+            color: white;
+        }
+        
+        .toast-error {
+            background-color: #ef4444;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans antialiased">
+    <!-- Toast Notifications -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="toast">
+            <div class="flex items-center {% if message.tags == 'success' %}toast-success{% else %}toast-error{% endif %} shadow-lg rounded-lg px-4 py-3">
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %} mr-2"></i>
+                <span>{{ message }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+
+        
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-users-cog mr-3 text-indigo-600"></i>
+                    Manage HR Staff
+                </h1>
+                <p class="text-gray-600 mt-1">View and manage your organization's HR personnel</p>
+            </div>
+            <div>
+            <a href="{% url 'add_hr_staff' %}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 transform hover-scale">
+                <i class="fas fa-user-plus mr-2"></i> Add New HR
+            </a>
+            <a href="{% url 'organization_dashboard' %}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 transform hover-scale">
+                <i class="fas fa-chevron-left mr-2"></i> Back to
+            </a>
+        </div>
+        </div>
+        
+        <!-- HR Staff Table -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg animate-fadeIn">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i class="fas fa-user mr-1"></i> User
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i class="fas fa-envelope mr-1"></i> Email
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i class="fas fa-user-tag mr-1"></i> Role
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i class="fas fa-power-off mr-1"></i> Status
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i class="fas fa-cog mr-1"></i> Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for hr in hr_staff %}
+                        <tr class="table-row-hover">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                                        <i class="fas fa-user-tie text-indigo-600"></i>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">{{ hr.user.get_full_name|default:hr.user.username }}</div>
+                                        <div class="text-sm text-gray-500">@{{ hr.user.username }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    {% if hr.user.email %}
+                                        <a href="mailto:{{ hr.user.email }}" class="hover:text-indigo-600">{{ hr.user.email }}</a>
+                                    {% else %}
+                                        <span class="text-gray-400 italic">No email</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="role-badge role-{{ hr.role|lower }}">
+                                    <i class="fas 
+                                        {% if hr.role == 'RECRUITER' %}fa-user-plus 
+                                        {% elif hr.role == 'MANAGER' %}fa-user-shield 
+                                        {% else %}fa-user-cog 
+                                        {% endif %} 
+                                        mr-1"></i>
+                                    {{ hr.get_role_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs rounded-full {% if hr.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                    <i class="fas {% if hr.is_active %}fa-check-circle{% else %}fa-times-circle{% endif %} mr-1"></i>
+                                    {% if hr.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex items-center justify-end space-x-4">
+                                    <a href="{% url 'manage_hr_staff' hr.id %}" class="text-indigo-600 hover:text-indigo-900 hover-scale" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="post" action="{% url 'manage_hr_staff' hr.id %}" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit" name="toggle_active" class="{% if hr.is_active %}text-yellow-600 hover:text-yellow-900{% else %}text-green-600 hover:text-green-900{% endif %} hover-scale" title="{% if hr.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                            <i class="fas {% if hr.is_active %}fa-user-slash{% else %}fa-user-check{% endif %}"></i>
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{% url 'manage_hr_staff' hr.id %}" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit" name="delete" class="text-red-600 hover:text-red-900 hover-scale" title="Delete" onclick="return confirm('Are you sure you want to permanently remove this HR staff member?')">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                <div class="flex flex-col items-center justify-center py-8">
+                                    <i class="fas fa-users-slash text-4xl text-gray-300 mb-3"></i>
+                                    <p class="text-lg font-medium text-gray-400">No HR staff members found</p>
+                                    <p class="text-sm text-gray-400 mt-1">Add your first HR staff member to get started</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Pagination -->
+        {% if hr_staff.has_other_pages %}
+        <div class="flex items-center justify-between mt-6">
+            <div class="text-sm text-gray-700">
+                Showing <span class="font-medium">{{ hr_staff.start_index }}</span> to <span class="font-medium">{{ hr_staff.end_index }}</span> of <span class="font-medium">{{ hr_staff.paginator.count }}</span> results
+            </div>
+            <div class="flex space-x-2">
+                {% if hr_staff.has_previous %}
+                    <a href="?page={{ hr_staff.previous_page_number }}" class="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                        <i class="fas fa-chevron-left mr-1"></i> Previous
+                    </a>
+                {% endif %}
+                
+                {% if hr_staff.has_next %}
+                    <a href="?page={{ hr_staff.next_page_number }}" class="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                        Next <i class="fas fa-chevron-right ml-1"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Confirm before deleting
+        document.querySelectorAll('button[name="delete"]').forEach(button => {
+            button.addEventListener('click', function(e) {
+                if (!confirm('Are you sure you want to permanently remove this HR staff member?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        // Auto-hide toast notifications after 5 seconds
+        document.querySelectorAll('.toast').forEach(toast => {
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease-out forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        });
+
+        // Add slideOut animation dynamically
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

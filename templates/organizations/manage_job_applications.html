@@ -1,0 +1,273 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Job Applications - {{ organization.name }}</title>
+    <!-- Premium Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/@icon/phosphor-icons@1.4.1/src/css/phosphor.css" rel="stylesheet">
+    <!-- Animate.css for animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    {% tailwind_css %}
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+        }
+        .application-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .status-badge {
+            transition: all 0.3s ease;
+        }
+        .smooth-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans antialiased">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
+                        <i class="ph ph-clipboard-text text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold tracking-tight">Manage Applications</h2>
+                    <span class="px-3 py-1 bg-white/20 rounded-full text-sm font-medium ml-2">{{ organization.name }}</span>
+                </div>
+              
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 animate__animated animate__fadeIn">
+        <div class="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100">
+            <!-- Section Header -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-8 py-5 border-b border-gray-200 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-blue-100 rounded-lg text-blue-600">
+                        <i class="ph ph-list-checks text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800">Job Applications</h3>
+                    <span class="px-3 py-1 bg-white rounded-full text-sm font-medium shadow-sm">{{ job_applications|length }} total</span>
+                </div>
+                
+            </div>
+
+            <!-- Applications List -->
+            <div class="p-6">
+                {% if job_applications %}
+                <div class="grid gap-5">
+                    {% for application in job_applications %}
+                    <div class="application-card bg-white rounded-xl p-6 border border-gray-200 hover:border-blue-200 transition-all duration-300 smooth-transition shadow-sm hover:shadow-md">
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                            <!-- Applicant Avatar -->
+                            <div class="lg:col-span-1 flex justify-center lg:justify-start">
+                                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-blue-600 text-2xl font-bold">
+                                    {{ application.applicant.username|first|upper }}
+                                </div>
+                            </div>
+                            
+                            <!-- Applicant Info -->
+                            <div class="lg:col-span-3">
+                                <h4 class="font-bold text-gray-900 flex items-center">
+                                    <!-- <a href="{% url 'user_profile' application.applicant.username %}" class="hover:text-blue-600 hover:underline">
+                                        {{ application.applicant.username }}
+                                    </a> -->
+                                    {{ application.applicant.username }}
+                                    <span class="ml-2 px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full flex items-center">
+                                        <i class="ph ph-check-circle mr-1"></i> Verified
+                                    </span>
+                                </h4>
+                                <div class="flex items-center text-gray-500 text-sm mt-1">
+                                    <i class="ph ph-envelope mr-2"></i>
+                                    <span>{{ application.applicant.email|default:"Email not provided" }}</span>
+                                </div>
+                                <div class="flex items-center text-gray-500 text-sm mt-1">
+                                    <i class="ph ph-calendar mr-2"></i>
+                                    <span>Applied {{ application.created_at|date:"M d, Y" }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Job Info -->
+                            <div class="lg:col-span-4">
+                                <div class="bg-blue-50/50 rounded-lg p-3 border border-blue-100">
+                                    <h5 class="font-medium text-gray-800 flex items-center">
+                                        <i class="ph ph-briefcase mr-2 text-blue-600"></i>
+                                        {{ application.job.title }}
+                                    </h5>
+                                    <div class="flex flex-wrap gap-2 mt-2">
+                                        <span class="px-2 py-1 bg-gray-100 rounded-full text-xs flex items-center">
+                                            <i class="ph ph-map-pin mr-1 text-gray-500"></i>
+                                            {{ application.job.location|default:"Remote" }}
+                                        </span>
+                                        <span class="px-2 py-1 bg-gray-100 rounded-full text-xs flex items-center">
+                                            <i class="ph ph-currency-dollar mr-1 text-gray-500"></i>
+                                            {{ application.job.salary|default:"Salary not specified" }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Status and Actions -->
+                            <div class="lg:col-span-4">
+                                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-end gap-4">
+                                    <div class="flex items-center justify-between lg:justify-end">
+                                        <span class="status-badge px-3 py-1.5 rounded-full text-sm font-medium flex items-center
+                                            {% if application.status == 'Submitted' %}bg-blue-100 text-blue-800
+                                            {% elif application.status == 'Under Review' %}bg-amber-100 text-amber-800
+                                            {% elif application.status == 'Interview' %}bg-purple-100 text-purple-800
+                                            {% elif application.status == 'Accepted' %}bg-green-100 text-green-800
+                                            {% else %}bg-red-100 text-red-800{% endif %}">
+                                            {% if application.status == 'Submitted' %}
+                                            <i class="ph ph-hourglass mr-1.5"></i>
+                                            {% elif application.status == 'Under Review' %}
+                                            <i class="ph ph-eye mr-1.5"></i>
+                                            {% elif application.status == 'Interview' %}
+                                            <i class="ph ph-calendar-check mr-1.5"></i>
+                                            {% elif application.status == 'Accepted' %}
+                                            <i class="ph ph-check-circle mr-1.5"></i>
+                                            {% else %}
+                                            <i class="ph ph-x-circle mr-1.5"></i>
+                                            {% endif %}
+                                            {{ application.status }}
+                                        </span>
+                                    </div>
+                                    
+                                    <!-- {% if is_owner or request.user == application.job.user %}
+                                    <form method="post" action="{% url 'manage_job_applications' org_id=organization.id %}" 
+                                          class="flex items-center space-x-2">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="application_id" value="{{ application.id }}">
+                                        <div class="relative">
+                                            <select name="status" class="appearance-none bg-white border border-gray-300 rounded-lg pl-3 pr-8 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 focus:outline-none cursor-pointer">
+                                                <option value="Submitted" {% if application.status == 'Submitted' %}selected{% endif %}>Submitted</option>
+                                                <option value="Under Review" {% if application.status == 'Under Review' %}selected{% endif %}>Under Review</option>
+                                                <option value="Interview" {% if application.status == 'Interview' %}selected{% endif %}>Interview</option>
+                                                <option value="Accepted" {% if application.status == 'Accepted' %}selected{% endif %}>Accepted</option>
+                                                <option value="Rejected" {% if application.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                                            </select>
+                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                                <i class="ph ph-caret-down"></i>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm flex items-center space-x-1 transition-all duration-300 shadow-sm hover:shadow-md">
+                                            <i class="ph ph-arrows-clockwise"></i>
+                                            <span>Update</span>
+                                        </button>
+                                    </form>
+                                    {% endif %} -->
+                                </div>
+                                
+                                <div class="flex justify-end mt-3 space-x-2">
+                                    <a href="#" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors duration-300">
+                                        <i class="ph ph-note"></i>
+                                    </a>
+                                    <a href="#" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors duration-300">
+                                        <i class="ph ph-chat-circle-text"></i>
+                                    </a>
+                                    <a href="#" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors duration-300">
+                                        <i class="ph ph-user-circle"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-12 animate__animated animate__fadeIn">
+                    <div class="mx-auto w-20 h-20 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mb-6">
+                        <i class="ph ph-magnifying-glass text-3xl text-blue-500"></i>
+                    </div>
+                    <h4 class="text-xl font-medium text-gray-800 mb-2">No applications found</h4>
+                    <p class="text-gray-500 max-w-md mx-auto">When candidates apply to your organization's jobs, their applications will appear here for you to review and manage.</p>
+                    <button class="mt-6 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-6 py-2.5 rounded-lg shadow-md transition-all duration-300 flex items-center mx-auto">
+                        <i class="ph ph-plus-circle mr-2"></i> Post a New Job
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            
+           <!-- Pagination -->
+
+<!-- {% if page_obj.has_other_pages %}
+<div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between bg-gray-50/50">
+    <div class="text-sm text-gray-500">
+        Showing <span class="font-medium">{{ page_obj.start_index }}</span> to <span class="font-medium">{{ page_obj.end_index }}</span> of <span class="font-medium">{{ page_obj.paginator.count }}</span> applications
+    </div>
+    <div class="flex space-x-2">
+        {% if page_obj.has_previous %}
+            <a href="?page=1" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-medium flex items-center bg-white hover:bg-gray-50">
+                <i class="ph ph-caret-left mr-1"></i> First
+            </a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-medium flex items-center bg-white hover:bg-gray-50">
+                <i class="ph ph-caret-left mr-1"></i> Previous
+            </a>
+        {% endif %} -->
+
+        <!-- Page numbers -->
+        <!-- {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <span class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-medium bg-blue-600 text-white">{{ num }}</span>
+            {% else %}
+                <a href="?page={{ num }}" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-medium bg-white hover:bg-gray-50">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-medium flex items-center bg-white hover:bg-gray-50">
+                Next <i class="ph ph-caret-right ml-1"></i>
+            </a>
+            <a href="?page={{ page_obj.paginator.num_pages }}" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm font-medium flex items-center bg-white hover:bg-gray-50">
+                Last <i class="ph ph-caret-right ml-1"></i>
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %} -->
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-12 py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                    <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                        <i class="ph ph-briefcase text-white text-xl"></i>
+                    </div>
+                    <span class="text-lg font-semibold text-gray-800">{{ organization.name }} Careers</span>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors duration-300">
+                        <i class="ph ph-twitter-logo text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors duration-300">
+                        <i class="ph ph-linkedin-logo text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors duration-300">
+                        <i class="ph ph-facebook-logo text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-blue-600 transition-colors duration-300">
+                        <i class="ph ph-instagram-logo text-xl"></i>
+                    </a>
+                </div>
+            </div>
+          
+        </div>
+    </footer>
+
+    <!-- Floating Action Button -->
+    <div class="fixed bottom-6 right-6 animate__animated animate__fadeInUp animate__delay-1s">
+        <button class="w-14 h-14 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-xl flex items-center justify-center hover:shadow-2xl transition-all duration-300">
+            <i class="ph ph-plus text-2xl"></i>
+        </button>
+    </div>
+</body>
+</html>

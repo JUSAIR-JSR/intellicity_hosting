@@ -1,0 +1,259 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Job Posting - {{ organization.name }}</title>
+    {% tailwind_css %}
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        .form-input {
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            width: 100%;
+            font-size: 1rem;
+            padding: 0.75rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 8rem;
+            resize: vertical;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Checkbox styles for required_skills */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            background-color: #f8fafc;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .checkbox-item input {
+            width: auto;
+            margin-right: 0.5rem;
+        }
+
+        /* Special styling for required_qualifications */
+        .required-qualifications {
+            min-height: 10rem;
+        }
+
+        /* DateTime picker styling */
+        input[type="datetime-local"] {
+            max-width: 24rem;
+        }
+
+        /* Image upload styling */
+        .file-input {
+            padding: 0.5rem;
+        }
+
+        .file-input::-webkit-file-upload-button {
+            background: #e2e8f0;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            margin-right: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .file-input::-webkit-file-upload-button:hover {
+            background: #cbd5e1;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        
+        <!-- Header and Back Button -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <a href="{% url 'job_posting_list' org_id=organization.id %}" class="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center transition-colors">
+                <i class="ri-arrow-left-line mr-2"></i> Back to Job Postings
+            </a>
+            <h2 class="text-2xl sm:text-3xl font-bold text-indigo-600 flex items-center">
+                <i class="ri-edit-2-line mr-3"></i>
+                Update Job Posting
+            </h2>
+        </div>
+
+        <!-- Form Container -->
+        <div class="bg-white rounded-xl shadow-sm p-6 md:p-8 border border-gray-100">
+            <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Title -->
+                <div class="form-group">
+                    <label for="{{ form.title.id_for_label }}" class="form-label">
+                        {{ form.title.label }} <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="{{ form.title.name }}" id="{{ form.title.id_for_label }}" 
+                           value="{{ form.title.value|default:'' }}" class="form-input" required>
+                    {% if form.title.errors %}
+                        {% for error in form.title.errors %}
+                            <p class="error-message">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                        {{ form.description.label }} <span class="text-red-500">*</span>
+                    </label>
+                    <textarea name="{{ form.description.name }}" id="{{ form.description.id_for_label }}" 
+                              class="form-input form-textarea" required>{{ form.description.value|default:'' }}</textarea>
+                    {% if form.description.errors %}
+                        {% for error in form.description.errors %}
+                            <p class="error-message">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Required Qualifications -->
+                <div class="form-group">
+                    <label for="{{ form.required_qualifications.id_for_label }}" class="form-label">
+                        {{ form.required_qualifications.label }} <span class="text-red-500">*</span>
+                    </label>
+                    <textarea name="{{ form.required_qualifications.name }}" id="{{ form.required_qualifications.id_for_label }}" 
+                              class="form-input form-textarea required-qualifications" required>{{ form.required_qualifications.value|default:'' }}</textarea>
+                    {% if form.required_qualifications.errors %}
+                        {% for error in form.required_qualifications.errors %}
+                            <p class="error-message">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Required Skills (Checkboxes) -->
+                <div class="form-group">
+                    <label class="form-label">
+                        {{ form.required_skills.label }}
+                    </label>
+                    <div class="checkbox-group">
+                        {% for checkbox in form.required_skills %}
+                            <div class="checkbox-item">
+                                {{ checkbox.tag }}
+                                <label for="{{ checkbox.id_for_label }}">{{ checkbox.choice_label }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% if form.required_skills.errors %}
+                        {% for error in form.required_skills.errors %}
+                            <p class="error-message">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- New Skills -->
+                <div class="form-group">
+                    <label for="{{ form.new_skills.id_for_label }}" class="form-label">
+                        {{ form.new_skills.label }}
+                    </label>
+                    <textarea name="{{ form.new_skills.name }}" id="{{ form.new_skills.id_for_label }}" 
+                              class="form-input form-textarea">{{ form.new_skills.value|default:'' }}</textarea>
+                    {% if form.new_skills.help_text %}
+                        <p class="text-gray-500 text-sm mt-1">{{ form.new_skills.help_text }}</p>
+                    {% endif %}
+                    {% if form.new_skills.errors %}
+                        {% for error in form.new_skills.errors %}
+                            <p class="error-message">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Location -->
+                <div class="form-group">
+                    <label for="{{ form.location.id_for_label }}" class="form-label">
+                        {{ form.location.label }} <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="{{ form.location.name }}" id="{{ form.location.id_for_label }}" 
+                           value="{{ form.location.value|default:'' }}" class="form-input" required>
+                    {% if form.location.errors %}
+                        {% for error in form.location.errors %}
+                            <p class="error-message">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Application Deadline -->
+                <div class="form-group">
+                    <label for="{{ form.application_deadline.id_for_label }}" class="form-label">
+                        {{ form.application_deadline.label }} <span class="text-red-500">*</span>
+                    </label>
+                    <input type="datetime-local" name="{{ form.application_deadline.name }}" 
+                           id="{{ form.application_deadline.id_for_label }}" 
+                           value="{{ form.application_deadline.value|date:'Y-m-d\TH:i' }}" 
+                           class="form-input" required>
+                    {% if form.application_deadline.errors %}
+                        {% for error in form.application_deadline.errors %}
+                            <p class="error-message">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Job Post Image -->
+                <div class="form-group">
+                    <label for="{{ form.job_post_image.id_for_label }}" class="form-label">
+                        {{ form.job_post_image.label }}
+                    </label>
+                    {% if form.instance.job_post_image %}
+                        <div class="mb-2">
+                            <p class="text-sm text-gray-600">Current Image:</p>
+                            <img src="{{ form.instance.job_post_image.url }}" alt="Current job post image" class="mt-1 h-32 object-contain border rounded">
+                        </div>
+                    {% endif %}
+                    <input type="file" name="{{ form.job_post_image.name }}" 
+                           id="{{ form.job_post_image.id_for_label }}" 
+                           class="form-input file-input">
+                    {% if form.job_post_image.errors %}
+                        {% for error in form.job_post_image.errors %}
+                            <p class="error-message">{{ error }}</p>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="pt-4 flex justify-end">
+                    <button type="submit" 
+                            class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm transition-colors flex items-center justify-center">
+                        <i class="ri-save-line mr-2"></i> Update Job Posting
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,138 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Job Applications</title>
+    {% tailwind_css %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .bg-animate {
+            background: linear-gradient(-45deg, rgba(239, 246, 255, 0.8), rgba(219, 234, 254, 0.8), rgba(191, 219, 254, 0.8), rgba(147, 197, 253, 0.8));
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        
+        .application-card {
+            transition: all 0.3s ease;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        .application-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .status-pending {
+            background-color: rgba(253, 230, 138, 0.2);
+            color: rgb(180, 83, 9);
+        }
+        
+        .status-accepted {
+            background-color: rgba(167, 243, 208, 0.2);
+            color: rgb(4, 120, 87);
+        }
+        
+        .status-rejected {
+            background-color: rgba(254, 202, 202, 0.2);
+            color: rgb(153, 27, 27);
+        }
+        
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+    </style>
+</head>
+<body class="bg-animate min-h-screen font-sans antialiased text-gray-800">
+    <div class="container mx-auto px-4 py-12 max-w-6xl">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-12 animate-fadeIn">
+            <div>
+                <h1 class="text-4xl font-bold text-gray-800 mb-2">Your Applications</h1>
+                <p class="text-lg text-gray-600">Track all your job applications in one place</p>
+            </div>
+            <a href="{% url 'user_dashboard' %}" class="flex items-center space-x-2 bg-white hover:bg-gray-50 text-blue-600 font-medium px-6 py-3 rounded-lg shadow-sm transition-all duration-300">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Dashboard</span>
+            </a>
+        </div>
+        
+        <!-- Applications List -->
+        <div class="space-y-6">
+            {% if applications %}
+                {% for application in applications %}
+                <div class="application-card opacity-0 delay-{% cycle '100' '200' '300' %} bg-white rounded-xl p-6 shadow-md border-l-4 
+                    {% if application.status == 'Pending' %}border-yellow-400{% endif %}
+                    {% if application.status == 'Accepted' %}border-green-400{% endif %}
+                    {% if application.status == 'Rejected' %}border-red-400{% endif %}">
+                    <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-4 mb-3">
+                                <div class="bg-blue-100 p-3 rounded-full">
+                                    <i class="fas fa-briefcase text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-800">{{ application.job.title }}</h3>
+                                    <p class="text-gray-600 flex items-center">
+                                        <i class="fas fa-building mr-2 text-blue-400"></i>
+                                        {{ application.job.organization.name }}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-3 mt-4">
+                                <div class="flex items-center text-sm bg-gray-100 px-3 py-1 rounded-full">
+                                    <i class="far fa-calendar-alt mr-2 text-blue-500"></i>
+                                    <span>Applied on: {{ application.applied_on|date:"M d, Y" }}</span>
+                                </div>
+                                
+                                <div class="flex items-center text-sm px-3 py-1 rounded-full 
+                                    {% if application.status == 'Pending' %}status-pending{% endif %}
+                                    {% if application.status == 'Accepted' %}status-accepted{% endif %}
+                                    {% if application.status == 'Rejected' %}status-rejected{% endif %}">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    <span>Status: {{ application.status }}</span>
+                                </div>
+                                
+                                {% if application.cv %}
+                                <a href="{{ application.cv.url }}" class="flex items-center text-sm bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1 rounded-full transition-colors">
+                                    <i class="fas fa-file-pdf mr-2"></i>
+                                    <span>Download CV</span>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="flex space-x-3">
+                            <button class="p-2 text-blue-500 hover:text-blue-700 transition-colors">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-16 bg-white rounded-xl shadow-sm animate-fadeIn">
+                    <div class="mx-auto w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-file-alt text-blue-500 text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-medium text-gray-700 mb-2">No applications yet</h3>
+                    <p class="text-gray-500 max-w-md mx-auto">You haven't applied to any jobs yet. Start your job search today!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

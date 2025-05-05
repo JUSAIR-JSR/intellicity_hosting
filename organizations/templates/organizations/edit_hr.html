@@ -1,0 +1,251 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit HR Staff - {{ hr.user.get_full_name }}</title>
+    {% tailwind_css %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        .checkbox-container input[type="checkbox"] {
+            opacity: 0;
+            position: absolute;
+        }
+        
+        .checkbox-container label {
+            position: relative;
+            padding-left: 2rem;
+            cursor: pointer;
+        }
+        
+        .checkbox-container label:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #c7d2fe;
+            border-radius: 0.25rem;
+            background: white;
+            transition: all 0.2s ease;
+        }
+        
+        .checkbox-container input[type="checkbox"]:checked + label:before {
+            background-color: #4f46e5;
+            border-color: #4f46e5;
+        }
+        
+        .checkbox-container label:after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0.25rem;
+            top: 0;
+            color: white;
+            font-size: 0.75rem;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+        
+        .checkbox-container input[type="checkbox"]:checked + label:after {
+            opacity: 1;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 3.5rem;
+            height: 1.75rem;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e2e8f0;
+            transition: .4s;
+            border-radius: 1.75rem;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 1.25rem;
+            width: 1.25rem;
+            left: 0.25rem;
+            bottom: 0.25rem;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #4f46e5;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(1.75rem);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans antialiased">
+    <div class="container mx-auto px-4 py-12 max-w-2xl">
+        <!-- Form Card -->
+        <div class="bg-white rounded-xl shadow-xl overflow-hidden animate-fadeIn">
+            <!-- Header -->
+            <div class="bg-indigo-500 p-6 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4">
+                    <i class="fas fa-user-edit text-white text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-white">Edit HR Staff</h1>
+                <p class="text-indigo-100 mt-1">{{ hr.user.get_full_name }}</p>
+            </div>
+            
+            <!-- Form Content -->
+            <div class="p-6 space-y-6">
+                {% if form.non_field_errors %}
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-red-500"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-red-700">
+                                    {{ form.non_field_errors }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- User Info -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-shrink-0 h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center">
+                                <i class="fas fa-user-tie text-indigo-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900">{{ hr.user.get_full_name }}</h3>
+                                <p class="text-gray-500">{{ hr.user.email }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Role Field -->
+                    <div class="space-y-2">
+                        <label for="id_role" class="block text-sm font-medium text-gray-700">
+                            <i class="fas fa-user-shield mr-2 text-indigo-500"></i> HR Role
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-tag text-gray-400"></i>
+                            </div>
+                            {{ form.role }}
+                        </div>
+                        {% if form.role.errors %}
+                            <div class="mt-1 text-sm text-red-600 flex items-start">
+                                <i class="fas fa-exclamation-circle mt-0.5 mr-1.5"></i>
+                                {{ form.role.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Permissions Section -->
+                    <div class="space-y-3">
+                        <label class="block text-sm font-medium text-gray-700">
+                            <i class="fas fa-key mr-2 text-indigo-500"></i> Permissions
+                        </label>
+                        
+                        <div class="space-y-3 pl-2">
+                            <div class="checkbox-container flex items-center">
+                                {{ form.can_post_jobs }}
+                                <label for="{{ form.can_post_jobs.id_for_label }}" class="text-gray-700">
+                                    Can Post Jobs
+                                    <span class="text-gray-500 text-sm ml-1">(Create and manage job postings)</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkbox-container flex items-center">
+                                {{ form.can_manage_applications }}
+                                <label for="{{ form.can_manage_applications.id_for_label }}" class="text-gray-700">
+                                    Can Manage Applications
+                                    <span class="text-gray-500 text-sm ml-1">(Review and process job applications)</span>
+                                </label>
+                            </div>
+                            
+                            <div class="checkbox-container flex items-center">
+                                {{ form.can_schedule_interviews }}
+                                <label for="{{ form.can_schedule_interviews.id_for_label }}" class="text-gray-700">
+                                    Can Schedule Interviews
+                                    <span class="text-gray-500 text-sm ml-1">(Arrange and conduct interviews)</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Active Status -->
+                    <div class="flex items-center justify-between pt-2">
+                        <div>
+                            <label for="id_is_active" class="block text-sm font-medium text-gray-700 mb-1">
+                                <i class="fas fa-power-off mr-2 text-indigo-500"></i> Account Status
+                            </label>
+                            <p class="text-sm text-gray-500">Enable or disable this HR staff member's access</p>
+                        </div>
+                        <label class="toggle-switch">
+                            {{ form.is_active }}
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <a href="{% url 'manage_hr_staff' %}" class="inline-flex items-center px-4 py-2 mr-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150">
+                            <i class="fas fa-times mr-2"></i> Cancel
+                        </a>
+                        <button type="submit" name="update_permissions" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-500 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 transform hover:scale-105">
+                            <i class="fas fa-save mr-2"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Style the role select dropdown
+        document.getElementById('id_role').className = 'block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500';
+        
+        // Add toggle switch accessibility
+        document.querySelectorAll('.toggle-switch input').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const statusText = this.checked ? 'Active' : 'Inactive';
+                console.log(`Account status changed to: ${statusText}`);
+            });
+        });
+    </script>
+</body>
+</html>
